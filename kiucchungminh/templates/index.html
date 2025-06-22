@@ -1,24 +1,122 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Ký Ức Lớp Mình</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <title>Ký Ức 2 đứa ngáo đá (bí cách gọi )</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #c2ffd8, #caffff);
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #9933cc;
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        .upload-box {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        button {
+            background-color: #f04e4e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .gallery img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+        .highlight {
+            border: 3px solid gold;
+        }
+        .swiper {
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .swiper-slide img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
-  <h1>📸 Ký Ức Lớp Mình</h1>
-  <form method="POST" enctype="multipart/form-data" class="upload-form">
-    <input type="file" name="file" required>
-    <button type="submit">Tải ảnh/video lên</button>
-  </form>
-  <div class="gallery">
-    {% for file in files %}
-      {% if file.endswith('.mp4') or file.endswith('.webm') %}
-        <video controls src="{{ url_for('static', filename='uploads/' + file) }}"></video>
-      {% else %}
-        <img src="{{ url_for('static', filename='uploads/' + file) }}" />
-      {% endif %}
-    {% endfor %}
-  </div>
+    <h1>📸 Ký Ức Lớp Mình</h1>
+    <div class="upload-box">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="file">
+            <br>
+            <button type="submit">Tải ảnh/video lên</button>
+        </form>
+    </div>
+
+    {% if files %}
+    <!-- Slider -->
+    <div class="swiper">
+        <div class="swiper-wrapper">
+            {% for file in files %}
+            <div class="swiper-slide">
+                <img src="{{ url_for('static', filename='uploads/' ~ file) }}" alt="Slide">
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Add Pagination -->
+        <div class="swiper-pagination"></div>
+        <!-- Add Navigation -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+    {% endif %}
+
+    <div class="gallery">
+        {% for file in files %}
+            <img src="{{ url_for('static', filename='uploads/' ~ file) }}"
+                 class="{% if file == uploaded_file %}highlight{% endif %}">
+        {% endfor %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper('.swiper', {
+            loop: true,
+            pagination: {
+                el: '.swiper-pagination',
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false,
+            },
+        });
+    </script>
 </body>
 </html>
