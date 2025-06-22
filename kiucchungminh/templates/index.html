@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ký Ức Lớp Mình</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <h1>📸 Ký Ức Lớp Mình</h1>
+  <form method="POST" enctype="multipart/form-data" class="upload-form">
+    <input type="file" name="file" required>
+    <button type="submit">Tải ảnh/video lên</button>
+  </form>
+  <div class="gallery">
+    {% for file in files %}
+      {% if file.endswith('.mp4') or file.endswith('.webm') %}
+        <video controls src="{{ url_for('static', filename='uploads/' + file) }}"></video>
+      {% else %}
+        <img src="{{ url_for('static', filename='uploads/' + file) }}" />
+      {% endif %}
+    {% endfor %}
+  </div>
+</body>
+</html>
