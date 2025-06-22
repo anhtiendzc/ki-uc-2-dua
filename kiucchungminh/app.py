@@ -1,31 +1,41 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect
+import cloudinary
+import cloudinary.uploader
 import os
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-@app.route('/', methods=['GET', 'POST'])
+# ✨ Cấu hình Cloudinary (thay thông tin bên dưới bằng của bạn)
+cloudinary.config(
+    cloud_name='dh8zykd67',
+    api_key='836368494927138',
+    api_secret='VqIqa9NebMYbubcjCCEJN5Ey2zY'
+)
+
+# Danh sách chứa link ảnh đã upload
+image_urls = []
+
+# Trang chủ hiển thị ảnh
+@app.route('/')
 def index():
-    uploaded_file = None
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            return 'No file part'
-        file = request.files['file']
-        if file.filename == '':
-            return 'No selected file'
-        if file:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            uploaded_file = filename
+    return render_template('index.html', image_urls=image_urls)
 
-    files = os.listdir(app.config['UPLOAD_FOLDER'])
-    files.sort(reverse=True)  # sắp xếp mới nhất lên đầu
-    return render_template('index.html', files=files, uploaded_file=uploaded_file)
+# Xử lý upload
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'image' not in request.files:
+        return redirect('/')
+    
+    file = request.files['image']
+    if file.filename == '':
+        return redirect('/')
+    
+    # Upload lên Cloudinary
+    upload_result = cloudinary.uploader.upload(file)
+    image_url = upload_result['secure_url']
+    image_urls.append(image_url)
+    
+    return redirect('/')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
