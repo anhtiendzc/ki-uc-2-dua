@@ -1,17 +1,15 @@
+from flask import Flask, render_template, request, redirect, url_for
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = 'memory_secret_key'
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4'}
 
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -19,28 +17,23 @@ def allowed_file(filename):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('Không có file nào được chọn')
-            return redirect(request.url)
-        file = request.files['file']
+        file = request.files.get('file')
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-    files = sorted(os.listdir(UPLOAD_FOLDER))
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('index'))
+
+    files = os.listdir(app.config['UPLOAD_FOLDER'])
     return render_template('index.html', files=files)
 
-@app.route('/delete/<filename>', methods=['POST'])
-def delete_file(filename):
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if os.path.exists(file_path):
-        os.remove(file_path)
-        flash(f"Đã xóa {filename}")
-    else:
-        flash(f"Không tìm thấy {filename}")
+@app.route('/delete', methods=['POST'])
+def delete():
+    filename = request.form.get('filename')
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if os.path.exists(filepath):
+        os.remove(filepath)
     return redirect(url_for('index'))
-if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 5000))  # Lấy PORT do Render cung cấp
-    app.run(host='0.0.0.0', port=port)
 
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
