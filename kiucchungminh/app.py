@@ -39,3 +39,8 @@ def delete_file(filename):
     else:
         flash(f"Không tìm thấy {filename}")
     return redirect(url_for('index'))
+    if __name__ == '__main__':
+    import os
+    port = int(os.environ.get('PORT', 5000))  # Lấy PORT do Render cung cấp
+    app.run(host='0.0.0.0', port=port)
+
