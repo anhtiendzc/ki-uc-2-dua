@@ -2,29 +2,21 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Ký Ức 500ae</title>
+  <title>Ký Ức 2 đứa cute</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
 </head>
 <body>
 
-  <!-- Nhạc nền -->
-  <audio autoplay loop hidden>
-    <source src="{{ url_for('static', filename='music/background.mp3') }}" type="audio/mpeg">
-    Trình duyệt của bạn không hỗ trợ phát âm thanh.
-  </audio>
+  <h1>✨ Ký Ức 2 đứa cute ✨</h1>
 
-  <h1>✨ Ký Ức 500ae ✨</h1>
-
-  <!-- Form upload -->
   <div class="upload-box">
     <form method="POST" enctype="multipart/form-data">
-      <input type="file" name="file">
+      <input type="file" name="file" required>
       <button type="submit">Tải ảnh/video lên</button>
     </form>
   </div>
 
-  <!-- Slider -->
   {% if files %}
   <div class="swiper">
     <div class="swiper-wrapper">
@@ -35,7 +27,6 @@
         {% else %}
           <img src="{{ url_for('static', filename='uploads/' ~ file) }}" alt="Slide" onclick="openModal(this)">
         {% endif %}
-        <!-- Nút xóa -->
         <form action="{{ url_for('delete_file', filename=file) }}" method="POST" onsubmit="return confirm('Xóa ảnh/video này?');">
           <button type="submit" class="delete-button">🗑️ Xóa</button>
         </form>
@@ -48,7 +39,6 @@
   </div>
   {% endif %}
 
-  <!-- Modal phóng to ảnh -->
   <div id="imageModal" class="modal" onclick="closeModal()">
     <span class="close">&times;</span>
     <img class="modal-content" id="modalImage">
