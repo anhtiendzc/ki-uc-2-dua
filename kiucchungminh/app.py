@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash
+from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -18,7 +18,6 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    uploaded_file = None
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('Không có file nào được chọn')
@@ -28,13 +27,12 @@ def index():
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
-            uploaded_file = filename
     files = sorted(os.listdir(UPLOAD_FOLDER))
-    return render_template('index.html', files=files, uploaded_file=uploaded_file)
+    return render_template('index.html', files=files)
 
 @app.route('/delete/<filename>', methods=['POST'])
 def delete_file(filename):
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if os.path.exists(file_path):
         os.remove(file_path)
         flash(f"Đã xóa {filename}")
