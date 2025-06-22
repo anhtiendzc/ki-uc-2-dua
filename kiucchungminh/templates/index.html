@@ -1,182 +1,124 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Ký Ức 2 đứa ngáo đá (bí cách gọi )</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(to right, #c2ffd8, #caffff);
-            text-align: center;
-            padding: 20px;
-        }
-        h1 {
-            color: #9933cc;
-            font-size: 40px;
-            margin-bottom: 20px;
-        }
-        .upload-box {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            display: inline-block;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        button {
-            background-color: #f04e4e;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin-top: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
-        }
-        .gallery img {
-            width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .gallery img:hover {
-            transform: scale(1.05);
-        }
-        .highlight {
-            border: 3px solid gold;
-        }
-        .swiper {
-            width: 90%;
-            max-width: 800px;
-            margin: auto;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .swiper-slide img {
-            width: 100%;
-            height: auto;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Ký Ức Chung Mình</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #d4fc79, #96e6a1);
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      color: #8e44ad;
+      padding-top: 30px;
+    }
+    .upload-form {
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .upload-form input[type="file"] {
+      margin-bottom: 10px;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .gallery img, .gallery video {
+      width: 100%;
+      height: auto;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: transform 0.3s;
+    }
+    .gallery img:hover, .gallery video:hover {
+      transform: scale(1.05);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .modal video, .modal img {
+      width: 100%;
+      height: auto;
+    }
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 40px;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <h1>📸 Ký Ức 2 đứa ngáo đá (bí cách gọi )</h1>
-    <div class="upload-box">
-        <form method="POST" enctype="multipart/form-data">
-            <input type="file" name="file">
-            <br>
-            <button type="submit">Tải ảnh/video lên</button>
-        </form>
-    </div>
+  <h1>Ký Ức Lớp Mình</h1>
 
-    {% if files %}
-    <!-- Slider -->
-    <div class="swiper">
-        <div class="swiper-wrapper">
-            {% for file in files %}
-            <div class="swiper-slide">
-                <img src="{{ url_for('static', filename='uploads/' ~ file) }}" alt="Slide">
-            </div>
-            {% endfor %}
-        </div>
-        <!-- Add Pagination -->
-        <div class="swiper-pagination"></div>
-        <!-- Add Navigation -->
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
-    </div>
-    {% endif %}
+  <div class="upload-form">
+    <form method="POST" enctype="multipart/form-data">
+      <input type="file" name="file" required><br>
+      <button type="submit">Tải ảnh/video lên</button>
+    </form>
+  </div>
 
-    <div class="gallery">
-        {% for file in files %}
-           {% if file.endswith('.jpg') or file.endswith('.png') or file.endswith('.jpeg') %}
-  <img src="{{ url_for('static', filename='uploads/' ~ file) }}"
-       class="{% if file == uploaded_file %}highlight{% endif %}"
-       onclick="openModal(this.src)">
-{% elif file.endswith('.mp4') or file.endswith('.webm') %}
-  <video controls onclick="openModal(this.currentSrc)">
-    <source src="{{ url_for('static', filename='uploads/' ~ file) }}">
-  </video>
-{% endif %}
-    </div>
+  <div class="gallery">
+    {% for file in files %}
+      {% if file.endswith('.jpg') or file.endswith('.png') or file.endswith('.jpeg') %}
+        <img src="{{ url_for('static', filename='uploads/' ~ file) }}" onclick="openModal(this.src, 'image')">
+      {% elif file.endswith('.mp4') %}
+        <video src="{{ url_for('static', filename='uploads/' ~ file) }}" controls muted onclick="openModal(this.src, 'video')"></video>
+      {% endif %}
+    {% endfor %}
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-    <script>
-        const swiper = new Swiper('.swiper', {
-            loop: true,
-            pagination: {
-                el: '.swiper-pagination',
-            },
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            autoplay: {
-                delay: 3000,
-                disableOnInteraction: false,
-            },
-        });
-    </script>
-    <!-- Modal Hiển Thị Phóng To -->
-<div id="myModal" class="modal" onclick="this.style.display='none'">
-  <span class="close">&times;</span>
-  <img class="modal-content" id="imgModal">
-  <video class="modal-content" id="videoModal" controls></video>
-</div>
+  <!-- Modal để hiển thị ảnh/video lớn -->
+  <div class="modal" id="myModal" onclick="closeModal()">
+    <span class="close">&times;</span>
+    <div class="modal-content" id="modalContent"></div>
+  </div>
 
-<style>
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  padding-top: 60px;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.9);
-}
-.modal-content {
-  display: block;
-  margin: auto;
-  max-width: 90%;
-  max-height: 80%;
-}
-#videoModal { display: none; }
-#imgModal { display: none; }
-.close {
-  position: absolute;
-  top: 20px; right: 35px;
-  font-size: 40px;
-  color: white;
-  cursor: pointer;
-}
-</style>
+  <script>
+    function openModal(src, type) {
+      const modal = document.getElementById("myModal");
+      const content = document.getElementById("modalContent");
+      if (type === 'image') {
+        content.innerHTML = `<img src="${src}" alt="Image">`;
+      } else if (type === 'video') {
+        content.innerHTML = `<video src="${src}" controls autoplay></video>`;
+      }
+      modal.style.display = "flex";
+    }
 
-<script>
-function openModal(src) {
-  const modal = document.getElementById("myModal");
-  const img = document.getElementById("imgModal");
-  const vid = document.getElementById("videoModal");
-  modal.style.display = "block";
-  if (src.endsWith('.mp4') || src.endsWith('.webm')) {
-    img.style.display = "none";
-    vid.style.display = "block";
-    vid.src = src;
-    vid.play();
-  } else {
-    vid.pause();
-    vid.style.display = "none";
-    img.style.display = "block";
-    img.src = src;
-  }
-}
-</script>
-
+    function closeModal() {
+      const modal = document.getElementById("myModal");
+      const content = document.getElementById("modalContent");
+      modal.style.display = "none";
+      content.innerHTML = "";
+    }
+  </script>
 </body>
 </html>
