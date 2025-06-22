@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Ký Ức 2 đứa ngáo đá</title>
+  <title>✨ Ký Ức 2 đứa cute ✨</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -28,6 +28,18 @@
     .upload-form input[type="file"] {
       margin-bottom: 10px;
     }
+
+    /* Swiper Slider */
+    .swiper {
+      width: 100%;
+      max-width: 800px;
+      margin: 40px auto;
+    }
+    .swiper-slide img, .swiper-slide video {
+      width: 100%;
+      border-radius: 15px;
+    }
+
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -36,6 +48,7 @@
       max-width: 1200px;
       margin: auto;
     }
+
     .gallery img, .gallery video {
       width: 100%;
       height: auto;
@@ -43,11 +56,11 @@
       border-radius: 10px;
       transition: transform 0.3s;
     }
+
     .gallery img:hover, .gallery video:hover {
       transform: scale(1.05);
     }
 
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -58,14 +71,17 @@
       justify-content: center;
       align-items: center;
     }
+
     .modal-content {
       max-width: 90%;
       max-height: 90%;
     }
+
     .modal video, .modal img {
       width: 100%;
       height: auto;
     }
+
     .close {
       position: absolute;
       top: 20px;
@@ -77,32 +93,64 @@
   </style>
 </head>
 <body>
-  <h1>Ký Ức Ký Ức 2 đứa ngáo đá</h1>
+  <h1>✨ Ký Ức 2 đứa cute ✨</h1>
 
   <div class="upload-form">
-    <form method="POST" enctype="multipart/form-data">
-      <input type="file" name="file" required><br>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+      <input type="file" name="image" accept="image/*,video/*" required><br>
       <button type="submit">Tải ảnh/video lên</button>
     </form>
   </div>
 
+  <!-- Slider (hiển thị 5 ảnh đầu nếu có) -->
+  {% if image_urls %}
+  <div class="swiper">
+    <div class="swiper-wrapper">
+      {% for url in image_urls[:5] %}
+        <div class="swiper-slide">
+          {% if url.endswith('.mp4') %}
+            <video src="{{ url }}" controls muted></video>
+          {% else %}
+            <img src="{{ url }}" alt="Slide Image">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="swiper-pagination"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+  </div>
+  {% endif %}
+
+  <!-- Gallery -->
   <div class="gallery">
-    {% for file in files %}
-      {% if file.endswith('.jpg') or file.endswith('.png') or file.endswith('.jpeg') %}
-        <img src="{{ url_for('static', filename='uploads/' ~ file) }}" onclick="openModal(this.src, 'image')">
-      {% elif file.endswith('.mp4') %}
-        <video src="{{ url_for('static', filename='uploads/' ~ file) }}" controls muted onclick="openModal(this.src, 'video')"></video>
+    {% for url in image_urls %}
+      {% if url.endswith('.mp4') %}
+        <video src="{{ url }}" controls muted onclick="openModal(this.src, 'video')"></video>
+      {% else %}
+        <img src="{{ url }}" onclick="openModal(this.src, 'image')">
       {% endif %}
     {% endfor %}
   </div>
 
-  <!-- Modal để hiển thị ảnh/video lớn -->
+  <!-- Modal -->
   <div class="modal" id="myModal" onclick="closeModal()">
     <span class="close">&times;</span>
     <div class="modal-content" id="modalContent"></div>
   </div>
 
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
   <script>
+    new Swiper('.swiper', {
+      loop: true,
+      pagination: { el: '.swiper-pagination', clickable: true },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      }
+    });
+
     function openModal(src, type) {
       const modal = document.getElementById("myModal");
       const content = document.getElementById("modalContent");
