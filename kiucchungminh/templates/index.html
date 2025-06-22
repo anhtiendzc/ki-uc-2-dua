@@ -96,9 +96,15 @@
 
     <div class="gallery">
         {% for file in files %}
-            <img src="{{ url_for('static', filename='uploads/' ~ file) }}"
-                 class="{% if file == uploaded_file %}highlight{% endif %}">
-        {% endfor %}
+           {% if file.endswith('.jpg') or file.endswith('.png') or file.endswith('.jpeg') %}
+  <img src="{{ url_for('static', filename='uploads/' ~ file) }}"
+       class="{% if file == uploaded_file %}highlight{% endif %}"
+       onclick="openModal(this.src)">
+{% elif file.endswith('.mp4') or file.endswith('.webm') %}
+  <video controls onclick="openModal(this.currentSrc)">
+    <source src="{{ url_for('static', filename='uploads/' ~ file) }}">
+  </video>
+{% endif %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
@@ -118,5 +124,59 @@
             },
         });
     </script>
+    <!-- Modal Hiển Thị Phóng To -->
+<div id="myModal" class="modal" onclick="this.style.display='none'">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="imgModal">
+  <video class="modal-content" id="videoModal" controls></video>
+</div>
+
+<style>
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  padding-top: 60px;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.9);
+}
+.modal-content {
+  display: block;
+  margin: auto;
+  max-width: 90%;
+  max-height: 80%;
+}
+#videoModal { display: none; }
+#imgModal { display: none; }
+.close {
+  position: absolute;
+  top: 20px; right: 35px;
+  font-size: 40px;
+  color: white;
+  cursor: pointer;
+}
+</style>
+
+<script>
+function openModal(src) {
+  const modal = document.getElementById("myModal");
+  const img = document.getElementById("imgModal");
+  const vid = document.getElementById("videoModal");
+  modal.style.display = "block";
+  if (src.endsWith('.mp4') || src.endsWith('.webm')) {
+    img.style.display = "none";
+    vid.style.display = "block";
+    vid.src = src;
+    vid.play();
+  } else {
+    vid.pause();
+    vid.style.display = "none";
+    img.style.display = "block";
+    img.src = src;
+  }
+}
+</script>
+
 </body>
 </html>
