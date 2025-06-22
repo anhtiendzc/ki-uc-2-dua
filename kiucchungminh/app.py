@@ -1,32 +1,43 @@
-
-from flask import Flask, render_template, request, redirect, url_for
 import os
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+app.secret_key = 'memory_secret_key'
+
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'webm'}
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     uploaded_file = None
     if request.method == 'POST':
         if 'file' not in request.files:
-            return 'No file part'
+            flash('Không có file nào được chọn')
+            return redirect(request.url)
         file = request.files['file']
-        if file.filename == '':
-            return 'No selected file'
-        if file:
+        if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             uploaded_file = filename
-
-    files = os.listdir(app.config['UPLOAD_FOLDER'])
-    files.sort(reverse=True)  # sắp xếp mới nhất lên đầu
+    files = sorted(os.listdir(UPLOAD_FOLDER))
     return render_template('index.html', files=files, uploaded_file=uploaded_file)
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+@app.route('/delete/<filename>', methods=['POST'])
+def delete_file(filename):
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        flash(f"Đã xóa {filename}")
+    else:
+        flash(f"Không tìm thấy {filename}")
+    return redirect(url_for('index'))
