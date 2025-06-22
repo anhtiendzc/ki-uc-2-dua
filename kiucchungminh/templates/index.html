@@ -1,22 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <title>✨ Ký Ức 2 đứa cute ✨</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <style>
     body {
-      font-family: Arial;
-      background: #fdf6e3;
+      font-family: Arial, sans-serif;
+      background: #fff9f0;
       text-align: center;
       padding: 20px;
     }
+
+    h1 {
+      color: #ff6f61;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .slider {
+      width: 100%;
+      max-height: 350px;
+      overflow: hidden;
+      position: relative;
+      margin: 20px auto;
+      border-radius: 15px;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .slide.active {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    .upload-box {
+      margin-bottom: 20px;
+    }
+
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 15px;
       margin-top: 30px;
     }
+
     .gallery img {
       width: 100%;
       height: auto;
@@ -24,12 +58,11 @@
       border-radius: 10px;
       transition: transform 0.3s;
     }
+
     .gallery img:hover {
       transform: scale(1.05);
     }
-    .upload-box {
-      margin-bottom: 20px;
-    }
+
     .delete-btn {
       display: block;
       margin: 5px auto 15px;
@@ -40,6 +73,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     .modal {
       display: none;
       position: fixed;
@@ -50,6 +84,7 @@
       justify-content: center;
       align-items: center;
     }
+
     .modal img {
       max-width: 90%;
       max-height: 90%;
@@ -58,15 +93,25 @@
   </style>
 </head>
 <body>
+
   <h1>✨ Ký Ức 2 đứa cute ✨</h1>
 
+  <!-- Slider ảnh -->
+  <div class="slider">
+    <img class="slide active" src="{{ url_for('static', filename='slider/slide1.jpg') }}">
+    <img class="slide" src="{{ url_for('static', filename='slider/slide2.jpg') }}">
+    <img class="slide" src="{{ url_for('static', filename='slider/slide3.jpg') }}">
+  </div>
+
+  <!-- Form upload -->
   <div class="upload-box">
     <form method="POST" enctype="multipart/form-data">
       <input type="file" name="file" required>
-      <button type="submit">Tải ảnh/video lên</button>
+      <button type="submit">up ảnh lên đi người đẹp</button>
     </form>
   </div>
 
+  <!-- Hiển thị ảnh -->
   {% if files %}
   <div class="gallery">
     {% for file in files %}
@@ -81,15 +126,41 @@
   </div>
   {% endif %}
 
+  <!-- Modal xem ảnh -->
   <div class="modal" id="modal" onclick="this.style.display='none'">
     <img id="modal-img" src="">
   </div>
 
+  <!-- JS modal ảnh -->
   <script>
     function openModal(src) {
       document.getElementById('modal-img').src = src;
       document.getElementById('modal').style.display = 'flex';
     }
   </script>
+
+  <!-- JS slider ảnh -->
+  <script>
+    let slides = document.querySelectorAll(".slide");
+    let index = 0;
+
+    function showSlide(i) {
+      slides.forEach((slide, idx) => {
+        slide.classList.remove("active");
+        if (idx === i) {
+          slide.classList.add("active");
+        }
+      });
+    }
+
+    function nextSlide() {
+      index = (index + 1) % slides.length;
+      showSlide(index);
+    }
+
+    // Start
+    setInterval(nextSlide, 4000);
+  </script>
+
 </body>
 </html>
